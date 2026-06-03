@@ -16,6 +16,7 @@ if (!(Test-Path $git)) {
 
 if (Test-Path $gitMingwBin) {
   $env:PATH = "$gitMingwBin;$env:PATH"
+  $env:GIT_EXEC_PATH = $gitMingwBin
 }
 
 & $git -c "safe.directory=$repo" -C $root @GitArgs
