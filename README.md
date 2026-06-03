@@ -213,6 +213,31 @@ cd sedori-alert
 .\scripts\start-keyword-monitor.ps1 -UserId 1 -Limit 20 -EverySeconds 60
 ```
 
+Windowsログイン時に自動監視を開始:
+
+```powershell
+cd sedori-alert
+.\scripts\install-keyword-monitor-task.ps1 -UserId 1 -Limit 20 -EverySeconds 60
+```
+
+登録状態の確認:
+
+```powershell
+.\scripts\show-keyword-monitor-task.ps1
+```
+
+自動監視を解除:
+
+```powershell
+.\scripts\uninstall-keyword-monitor-task.ps1
+```
+
+自動監視ログ:
+
+```text
+logs\keyword-monitor.log
+```
+
 ## 秘密情報
 
 Discord Webhook URLは暗号化してDBに保存します。
