@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from html import unescape
 from urllib.parse import urljoin
 from urllib.request import Request, urlopen
+import gzip
 import re
+import zlib
 
 
 @dataclass(frozen=True)
@@ -17,16 +19,34 @@ class ScrapedProduct:
     stock_status: str = "instock"
 
 
-def fetch_html(url: str, timeout: int = 20) -> str:
+def fetch_html(url: str, timeout: int = 20, referer: str | None = None) -> str:
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/125.0.0.0 Safari/537.36"
+        ),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept-Language": "ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+        "Upgrade-Insecure-Requests": "1",
+    }
+    if referer:
+        headers["Referer"] = referer
     request = Request(
         url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
-        },
+        headers=headers,
     )
     with urlopen(request, timeout=timeout) as response:
-        return response.read().decode("utf-8", "replace")
+        body = response.read()
+        encoding = response.headers.get("Content-Encoding", "").lower()
+        if encoding == "gzip":
+            body = gzip.decompress(body)
+        elif encoding == "deflate":
+            body = zlib.decompress(body)
+        return body.decode("utf-8", "replace")
 
 
 def strip_tags(value: str) -> str:
