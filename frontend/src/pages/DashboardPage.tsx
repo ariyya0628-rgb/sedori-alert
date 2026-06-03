@@ -72,6 +72,8 @@ export function DashboardPage({ userId }: { userId: number }) {
           <select className="input narrowInput" value={shopCode} onChange={(event) => setShopCode(event.target.value)}>
             <option value="offmall">オフモール</option>
             <option value="secondstreet">セカンドストリート</option>
+            <option value="mandarake">まんだらけ</option>
+            <option value="surugaya">駿河屋</option>
           </select>
           <input className="input" value={keyword} onChange={(event) => setKeyword(event.target.value)} />
           <input

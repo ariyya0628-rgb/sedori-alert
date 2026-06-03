@@ -4,8 +4,10 @@ from sqlalchemy.orm import Session
 
 from app.models import CrawlLog, Keyword, Notification, Product
 from app.services.adapters.base import ScrapedProduct
+from app.services.adapters.mandarake import fetch_mandarake_products
 from app.services.adapters.offmall import fetch_offmall_products
 from app.services.adapters.secondstreet import fetch_secondstreet_products
+from app.services.adapters.surugaya import fetch_surugaya_products
 from app.models import NotificationSetting
 from app.services.discord import send_discord_webhook
 from app.services.secrets import decrypt_secret
@@ -17,6 +19,8 @@ from app.time_utils import utc_now
 SHOP_FETCHERS: dict[str, Callable[[str, int], list[ScrapedProduct]]] = {
     "offmall": fetch_offmall_products,
     "secondstreet": fetch_secondstreet_products,
+    "mandarake": fetch_mandarake_products,
+    "surugaya": fetch_surugaya_products,
 }
 
 
