@@ -36,6 +36,21 @@ cd sedori-alert
 
 ## バックエンド起動
 
+専用サイトとして起動:
+
+```powershell
+cd sedori-alert
+.\scripts\start-site.ps1
+```
+
+画面:
+
+```text
+http://127.0.0.1:8000/
+```
+
+この起動方法では、バックエンドがビルド済みフロントエンドも配信するため、1つのURLで画面とAPIが動きます。
+
 簡単起動:
 
 ```powershell

@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import models  # noqa: F401
 from app.config import settings
 from app.database import Base, SessionLocal, engine
+from app.frontend import mount_frontend
 from app.routers import auth, crawl_logs, crawler, keywords, notification_settings, notifications, products, scheduler
 from app.seed import seed_admin_user
 
@@ -36,3 +37,6 @@ app.include_router(scheduler.router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+mount_frontend(app)
