@@ -61,6 +61,16 @@ export type SchedulerRunDueResult = {
   result: (MockCrawlerResult & { status: string; error_message: string | null }) | null;
 };
 
+export type KeywordWatchResult = {
+  run_count: number;
+  skipped_count: number;
+  results: Array<{
+    shop_code: string;
+    keyword: string;
+    result: MockCrawlerResult & { status: string; error_message: string | null };
+  }>;
+};
+
 export type MockCrawlerResult = {
   fetched_count: number;
   matched_count: number;
@@ -147,6 +157,18 @@ export async function runShopCrawler(
     method: "POST",
   });
   if (!response.ok) throw new Error("ショップ巡回に失敗しました");
+  return response.json();
+}
+
+export async function runRegisteredKeywords(userId: number, limit: number): Promise<KeywordWatchResult> {
+  const params = new URLSearchParams({
+    user_id: String(userId),
+    limit: String(limit),
+  });
+  const response = await fetch(`${API_BASE}/api/crawler/run-keywords?${params.toString()}`, {
+    method: "POST",
+  });
+  if (!response.ok) throw new Error("登録キーワード巡回に失敗しました");
   return response.json();
 }
 

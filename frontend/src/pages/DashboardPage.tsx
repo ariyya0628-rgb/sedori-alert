@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { MockCrawlerResult, runMockCrawler, runShopCrawler } from "../api";
+import { KeywordWatchResult, MockCrawlerResult, runMockCrawler, runRegisteredKeywords, runShopCrawler } from "../api";
 
 export function DashboardPage({ userId }: { userId: number }) {
   const [result, setResult] = useState<MockCrawlerResult | null>(null);
   const [shopResult, setShopResult] = useState<(MockCrawlerResult & { status: string; error_message: string | null }) | null>(null);
+  const [keywordWatchResult, setKeywordWatchResult] = useState<KeywordWatchResult | null>(null);
   const [shopCode, setShopCode] = useState("offmall");
   const [keyword, setKeyword] = useState("レコルト");
   const [limit, setLimit] = useState(5);
@@ -26,6 +27,16 @@ export function DashboardPage({ userId }: { userId: number }) {
       setShopResult(await runShopCrawler(userId, shopCode, keyword, limit));
     } catch (err) {
       setError(err instanceof Error ? err.message : "ショップ巡回に失敗しました");
+    }
+  }
+
+  async function runKeywords() {
+    setError("");
+    setKeywordWatchResult(null);
+    try {
+      setKeywordWatchResult(await runRegisteredKeywords(userId, limit));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "登録キーワード巡回に失敗しました");
     }
   }
 
@@ -65,6 +76,28 @@ export function DashboardPage({ userId }: { userId: number }) {
       <div className="card">
         <h3>次フェーズの監視対象</h3>
         <p>セカンドストリートオンライン、オフモール、駿河屋、まんだらけ、らしんばん</p>
+      </div>
+      <div className="card">
+        <h3>登録キーワード巡回</h3>
+        <div className="formRow">
+          <input
+            className="input tinyInput"
+            type="number"
+            min={1}
+            max={50}
+            value={limit}
+            onChange={(event) => setLimit(Number(event.target.value))}
+          />
+          <button className="primaryButton" onClick={runKeywords}>登録キーワードを巡回</button>
+        </div>
+        {keywordWatchResult && (
+          <div className="resultGrid">
+            <span>巡回: {keywordWatchResult.run_count}</span>
+            <span>スキップ: {keywordWatchResult.skipped_count}</span>
+            <span>通知作成: {keywordWatchResult.results.reduce((sum, item) => sum + item.result.notifications_created, 0)}</span>
+            <span>重複: {keywordWatchResult.results.reduce((sum, item) => sum + item.result.duplicates_skipped, 0)}</span>
+          </div>
+        )}
       </div>
       <div className="card">
         <h3>実ショップ取得テスト</h3>

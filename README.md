@@ -172,6 +172,23 @@ cd sedori-alert
 
 本番運用では、WindowsタスクスケジューラやVPSのcronから `run-scheduler-once.ps1` を定期実行する方式がおすすめです。
 
+登録済みキーワードをまとめて巡回:
+
+```powershell
+cd sedori-alert
+.\scripts\watch-keywords-once.ps1 -UserId 1 -Limit 20
+```
+
+元ツールに近い運用では、キーワード管理画面に登録した内容を使う `watch-keywords-once.ps1` を定期実行します。
+`全ショップ` のキーワードは対応済みショップすべて、ショップ指定のキーワードは指定ショップだけを巡回します。
+
+PC起動中に登録キーワードを簡易監視:
+
+```powershell
+cd sedori-alert
+.\scripts\start-keyword-monitor.ps1 -UserId 1 -Limit 20 -EverySeconds 60
+```
+
 ## 秘密情報
 
 Discord Webhook URLは暗号化してDBに保存します。
