@@ -96,6 +96,18 @@ cd sedori-alert\backend
 .\.venv\Scripts\python.exe -m pytest -v
 ```
 
+## Git管理
+
+このプロジェクトはGit管理済みです。
+
+この環境ではGitHub Desktop同梱のGitを使うため、Git操作は以下の補助スクリプトから実行できます。
+
+```powershell
+cd sedori-alert
+.\scripts\git.ps1 status
+.\scripts\git.ps1 log --oneline
+```
+
 ## モック巡回の確認
 
 1. フロントエンドでログインする
