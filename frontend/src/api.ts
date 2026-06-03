@@ -37,6 +37,10 @@ export type Keyword = {
   include_terms: string;
   exclude_terms: string;
   allowed_condition_ranks: string;
+  secondstreet_condition_ranks: string;
+  offmall_condition_ranks: string;
+  mandarake_condition_ranks: string;
+  surugaya_condition_tags: string;
   enabled: boolean;
   created_at: string;
 };
@@ -138,6 +142,10 @@ export type KeywordCreatePayload = {
   include_terms?: string;
   exclude_terms?: string;
   allowed_condition_ranks?: string;
+  secondstreet_condition_ranks?: string;
+  offmall_condition_ranks?: string;
+  mandarake_condition_ranks?: string;
+  surugaya_condition_tags?: string;
 };
 
 export async function createKeyword(userId: number, payload: KeywordCreatePayload) {

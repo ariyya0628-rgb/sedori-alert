@@ -29,6 +29,10 @@ class Keyword(Base):
     include_terms: Mapped[str] = mapped_column(Text, default="")
     exclude_terms: Mapped[str] = mapped_column(Text, default="")
     allowed_condition_ranks: Mapped[str] = mapped_column(Text, default="")
+    secondstreet_condition_ranks: Mapped[str] = mapped_column(Text, default="")
+    offmall_condition_ranks: Mapped[str] = mapped_column(Text, default="")
+    mandarake_condition_ranks: Mapped[str] = mapped_column(Text, default="")
+    surugaya_condition_tags: Mapped[str] = mapped_column(Text, default="")
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 

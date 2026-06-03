@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from html import unescape
-from urllib.parse import urljoin
-from urllib.request import Request, urlopen
 import gzip
+from html import unescape
 import re
 import unicodedata
+from urllib.parse import urljoin
+from urllib.request import Request, urlopen
 import zlib
 
 
@@ -37,10 +37,7 @@ def fetch_html(url: str, timeout: int = 20, referer: str | None = None) -> str:
     }
     if referer:
         headers["Referer"] = referer
-    request = Request(
-        url,
-        headers=headers,
-    )
+    request = Request(url, headers=headers)
     with urlopen(request, timeout=timeout) as response:
         body = response.read()
         encoding = response.headers.get("Content-Encoding", "").lower()
@@ -68,22 +65,83 @@ def parse_price(value: str | None) -> int:
     return int(digits) if digits else 0
 
 
-def parse_condition_rank(value: str | None) -> str | None:
+def normalize_condition_text(value: str | None) -> str:
     if not value:
+        return ""
+    return unicodedata.normalize("NFKC", strip_tags(value)).upper()
+
+
+def parse_secondstreet_condition(value: str | None) -> str | None:
+    text = normalize_condition_text(value)
+    if not text:
         return None
-    text = unicodedata.normalize("NFKC", strip_tags(value)).upper()
-    if "未使用" in text or "新品" in text:
-        return "未使用"
-    if "ジャンク" in text:
-        return "ジャンク"
-    for pattern in [
-        r"(?:状態|コンディション|ランク|RANK|中古)\s*[:：]?\s*([SABCD][+-]?)",
-        r"\b([SABCD][+-]?)\b",
-    ]:
-        match = re.search(pattern, text)
-        if match:
-            return match.group(1)
+    if "新品" in text:
+        return "新品"
+    if "未使用" in text:
+        return "未使用品"
+    match = re.search(r"中古\s*([ABCD])", text)
+    if match:
+        return f"中古{match.group(1)}"
     return None
+
+
+def parse_offmall_condition(value: str | None) -> str | None:
+    text = normalize_condition_text(value)
+    if not text:
+        return None
+    for rank in ["N", "S", "A", "B", "C", "D"]:
+        if re.search(rf"(?:商品ランク|ランク|RANK|状態)\s*[:：]?\s*{rank}\b", text):
+            return rank
+    return None
+
+
+def parse_mandarake_condition(value: str | None) -> str | None:
+    text = normalize_condition_text(value)
+    if not text:
+        return None
+    match = re.search(r"(?:状態|ランク|RANK|評価)\s*[:：]?\s*(10|[1-9])\b", text)
+    if match:
+        return match.group(1)
+    match = re.search(r"【\s*(10|[1-9])\s*】", text)
+    if match:
+        return match.group(1)
+    return None
+
+
+def parse_surugaya_condition(value: str | None) -> str | None:
+    text = normalize_condition_text(value)
+    if not text:
+        return "通常中古"
+    tags: list[str] = []
+    if "ジャンク" in text or "ノークレーム" in text or "ノーリターン" in text:
+        tags.append("ジャンク")
+    if (
+        "破損" in text
+        or "ワケあり" in text
+        or "訳あり" in text
+        or "難あり" in text
+        or "状態難" in text
+        or "ランクB" in text
+    ):
+        tags.append("注意あり")
+    if "未開封" in text:
+        tags.append("未開封品")
+    if "帯付き" in text or "帯付" in text:
+        tags.append("帯付き")
+    if "美品" in text:
+        tags.append("美品")
+    if not tags:
+        tags.append("通常中古")
+    return ",".join(dict.fromkeys(tags))
+
+
+def parse_condition_rank(value: str | None) -> str | None:
+    return (
+        parse_secondstreet_condition(value)
+        or parse_offmall_condition(value)
+        or parse_mandarake_condition(value)
+        or parse_surugaya_condition(value)
+    )
 
 
 def absolutize(base_url: str, href: str) -> str:

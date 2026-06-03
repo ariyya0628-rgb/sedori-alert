@@ -52,6 +52,10 @@ def create_keyword(payload: KeywordCreateRequest, db: Session = Depends(get_db))
         include_terms=payload.include_terms.strip(),
         exclude_terms=payload.exclude_terms.strip(),
         allowed_condition_ranks=payload.allowed_condition_ranks.strip(),
+        secondstreet_condition_ranks=payload.secondstreet_condition_ranks.strip(),
+        offmall_condition_ranks=payload.offmall_condition_ranks.strip(),
+        mandarake_condition_ranks=payload.mandarake_condition_ranks.strip(),
+        surugaya_condition_tags=payload.surugaya_condition_tags.strip(),
     )
     db.add(row)
     db.commit()
@@ -83,6 +87,14 @@ def update_keyword(keyword_id: int, payload: KeywordUpdate, db: Session = Depend
         row.exclude_terms = payload.exclude_terms.strip()
     if payload.allowed_condition_ranks is not None:
         row.allowed_condition_ranks = payload.allowed_condition_ranks.strip()
+    if payload.secondstreet_condition_ranks is not None:
+        row.secondstreet_condition_ranks = payload.secondstreet_condition_ranks.strip()
+    if payload.offmall_condition_ranks is not None:
+        row.offmall_condition_ranks = payload.offmall_condition_ranks.strip()
+    if payload.mandarake_condition_ranks is not None:
+        row.mandarake_condition_ranks = payload.mandarake_condition_ranks.strip()
+    if payload.surugaya_condition_tags is not None:
+        row.surugaya_condition_tags = payload.surugaya_condition_tags.strip()
     if payload.enabled is not None:
         row.enabled = payload.enabled
     db.commit()

@@ -6,7 +6,7 @@ from pathlib import Path
 from urllib.parse import quote
 from urllib.error import HTTPError
 
-from app.services.adapters.base import ScrapedProduct, absolutize, fetch_html, parse_condition_rank, parse_price, strip_tags
+from app.services.adapters.base import ScrapedProduct, absolutize, fetch_html, parse_price, parse_secondstreet_condition, strip_tags
 
 
 BASE_URL = "https://www.2ndstreet.jp"
@@ -112,7 +112,7 @@ def parse_secondstreet_products(html: str, limit: int = 20) -> list[ScrapedProdu
                 product_url=absolutize(BASE_URL, href),
                 image_url=None,
                 category=None,
-                condition_rank=parse_condition_rank(text),
+                condition_rank=parse_secondstreet_condition(text),
             )
         )
         seen_product_ids.add(product_id)

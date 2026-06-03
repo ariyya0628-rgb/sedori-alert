@@ -8,7 +8,7 @@ def make_product(**overrides):
         "title": "recolte Grill Pot RRF-3",
         "category": "kitchen",
         "price": 4290,
-        "condition_rank": "B",
+        "condition_rank": "中古B",
     }
     values.update(overrides)
     return Product(**values)
@@ -24,6 +24,10 @@ def make_keyword(**overrides):
         "include_terms": "",
         "exclude_terms": "",
         "allowed_condition_ranks": "",
+        "secondstreet_condition_ranks": "",
+        "offmall_condition_ranks": "",
+        "mandarake_condition_ranks": "",
+        "surugaya_condition_tags": "",
     }
     values.update(overrides)
     return Keyword(**values)
@@ -37,7 +41,7 @@ def test_additional_terms_match_when_main_keyword_does_not():
 
     assert decision.base_matched is True
     assert decision.should_notify is True
-    assert "recolte" in decision.match_reason
+    assert decision.match_reason == "一致語: recolte"
 
 
 def test_exclude_terms_skip_notification_after_match():
@@ -61,13 +65,61 @@ def test_price_range_skips_out_of_range_products():
     assert high.skip_reason == "価格が上限超過: 9,000円 > 8,000円"
 
 
-def test_allowed_condition_ranks_filter_products():
-    accepted = evaluate_product_match(make_product(condition_rank="B"), make_keyword(include_terms="recolte", allowed_condition_ranks="A,B"))
-    rejected = evaluate_product_match(make_product(condition_rank="C"), make_keyword(include_terms="recolte", allowed_condition_ranks="A,B"))
-    missing = evaluate_product_match(make_product(condition_rank=None), make_keyword(include_terms="recolte", allowed_condition_ranks="A,B"))
+def test_secondstreet_condition_uses_secondstreet_rank_list_only():
+    accepted = evaluate_product_match(
+        make_product(shop_code="secondstreet", condition_rank="中古B"),
+        make_keyword(include_terms="recolte", secondstreet_condition_ranks="新品,未使用品,中古A,中古B"),
+    )
+    rejected = evaluate_product_match(
+        make_product(shop_code="secondstreet", condition_rank="中古C"),
+        make_keyword(include_terms="recolte", secondstreet_condition_ranks="新品,未使用品,中古A,中古B"),
+    )
 
     assert accepted.should_notify is True
     assert rejected.should_notify is False
-    assert rejected.skip_reason == "状態ランク対象外: C"
-    assert missing.should_notify is False
-    assert missing.skip_reason == "状態ランク不明"
+    assert rejected.skip_reason == "セカスト状態対象外: 中古C"
+
+
+def test_offmall_condition_uses_offmall_rank_list_only():
+    accepted = evaluate_product_match(
+        make_product(shop_code="offmall", condition_rank="B"),
+        make_keyword(include_terms="recolte", offmall_condition_ranks="N,S,A,B"),
+    )
+    rejected = evaluate_product_match(
+        make_product(shop_code="offmall", condition_rank="C"),
+        make_keyword(include_terms="recolte", offmall_condition_ranks="N,S,A,B"),
+    )
+
+    assert accepted.should_notify is True
+    assert rejected.should_notify is False
+    assert rejected.skip_reason == "オフモール状態対象外: C"
+
+
+def test_mandarake_condition_uses_numeric_rank_list():
+    accepted = evaluate_product_match(
+        make_product(shop_code="mandarake", condition_rank="8"),
+        make_keyword(include_terms="recolte", mandarake_condition_ranks="10,9,8,7"),
+    )
+    rejected = evaluate_product_match(
+        make_product(shop_code="mandarake", condition_rank="5"),
+        make_keyword(include_terms="recolte", mandarake_condition_ranks="10,9,8,7"),
+    )
+
+    assert accepted.should_notify is True
+    assert rejected.should_notify is False
+    assert rejected.skip_reason == "まんだらけ状態対象外: 5"
+
+
+def test_surugaya_condition_uses_condition_tags():
+    accepted = evaluate_product_match(
+        make_product(shop_code="surugaya", condition_rank="未開封品,美品"),
+        make_keyword(include_terms="recolte", surugaya_condition_tags="未開封品,美品,通常中古"),
+    )
+    rejected = evaluate_product_match(
+        make_product(shop_code="surugaya", condition_rank="ジャンク"),
+        make_keyword(include_terms="recolte", surugaya_condition_tags="未開封品,美品,通常中古"),
+    )
+
+    assert accepted.should_notify is True
+    assert rejected.should_notify is False
+    assert rejected.skip_reason == "駿河屋状態対象外: ジャンク"

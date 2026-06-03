@@ -6,7 +6,7 @@ from app.services.adapters.base import (
     absolutize,
     extract_first,
     fetch_html,
-    parse_condition_rank,
+    parse_offmall_condition,
     parse_price,
     strip_tags,
 )
@@ -59,7 +59,7 @@ def parse_offmall_products(html: str, limit: int = 20) -> list[ScrapedProduct]:
                 product_url=absolutize(BASE_URL, href),
                 image_url=image_url,
                 category=None,
-                condition_rank=parse_condition_rank(condition_text),
+                condition_rank=parse_offmall_condition(condition_text),
             )
         )
         if len(products) >= limit:

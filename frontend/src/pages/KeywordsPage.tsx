@@ -29,7 +29,10 @@ export function KeywordsPage({ userId }: { userId: number }) {
   const [maxPrice, setMaxPrice] = useState("");
   const [includeTerms, setIncludeTerms] = useState("");
   const [excludeTerms, setExcludeTerms] = useState("");
-  const [conditionRanks, setConditionRanks] = useState("");
+  const [secondstreetRanks, setSecondstreetRanks] = useState("");
+  const [offmallRanks, setOffmallRanks] = useState("");
+  const [mandarakeRanks, setMandarakeRanks] = useState("");
+  const [surugayaTags, setSurugayaTags] = useState("");
   const [error, setError] = useState("");
 
   async function refresh() {
@@ -46,14 +49,20 @@ export function KeywordsPage({ userId }: { userId: number }) {
         max_price: parseOptionalNumber(maxPrice),
         include_terms: includeTerms,
         exclude_terms: excludeTerms,
-        allowed_condition_ranks: conditionRanks,
+        secondstreet_condition_ranks: secondstreetRanks,
+        offmall_condition_ranks: offmallRanks,
+        mandarake_condition_ranks: mandarakeRanks,
+        surugaya_condition_tags: surugayaTags,
       });
       setKeyword("");
       setMinPrice("");
       setMaxPrice("");
       setIncludeTerms("");
       setExcludeTerms("");
-      setConditionRanks("");
+      setSecondstreetRanks("");
+      setOffmallRanks("");
+      setMandarakeRanks("");
+      setSurugayaTags("");
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "登録に失敗しました。");
@@ -89,7 +98,9 @@ export function KeywordsPage({ userId }: { userId: number }) {
             ショップ
             <select className="input" value={shopCode} onChange={(event) => setShopCode(event.target.value)}>
               {shopOptions.map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
+                <option key={value} value={value}>
+                  {label}
+                </option>
               ))}
             </select>
           </label>
@@ -102,7 +113,7 @@ export function KeywordsPage({ userId }: { userId: number }) {
             <input className="input" inputMode="numeric" placeholder="空欄なら上限なし" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} />
           </label>
           <label>
-            追加一致語
+            表記ゆれ / 追加一致語
             <textarea className="input multiInput" placeholder={"例:\nrecolte\nRRF"} value={includeTerms} onChange={(event) => setIncludeTerms(event.target.value)} />
           </label>
           <label>
@@ -110,12 +121,26 @@ export function KeywordsPage({ userId }: { userId: number }) {
             <textarea className="input multiInput" placeholder={"例:\nジャンク\n部品"} value={excludeTerms} onChange={(event) => setExcludeTerms(event.target.value)} />
           </label>
           <label>
-            通知する状態ランク
-            <input className="input" placeholder="例: A,B,未使用 空欄なら制限なし" value={conditionRanks} onChange={(event) => setConditionRanks(event.target.value)} />
+            セカスト通知ランク
+            <input className="input" placeholder="例: 新品,未使用品,中古A,中古B" value={secondstreetRanks} onChange={(event) => setSecondstreetRanks(event.target.value)} />
+          </label>
+          <label>
+            オフモール通知ランク
+            <input className="input" placeholder="例: N,S,A,B" value={offmallRanks} onChange={(event) => setOffmallRanks(event.target.value)} />
+          </label>
+          <label>
+            まんだらけ通知ランク
+            <input className="input" placeholder="例: 10,9,8,7" value={mandarakeRanks} onChange={(event) => setMandarakeRanks(event.target.value)} />
+          </label>
+          <label>
+            駿河屋通知状態
+            <input className="input" placeholder="例: 未開封品,帯付き,美品,通常中古" value={surugayaTags} onChange={(event) => setSurugayaTags(event.target.value)} />
           </label>
         </div>
         <div className="formRow">
-          <button className="primaryButton" onClick={addKeyword}>登録</button>
+          <button className="primaryButton" onClick={addKeyword}>
+            登録
+          </button>
         </div>
         {error && <p className="errorText">{error}</p>}
       </div>
@@ -128,7 +153,10 @@ export function KeywordsPage({ userId }: { userId: number }) {
               <th>価格</th>
               <th>追加一致語</th>
               <th>除外語</th>
-              <th>状態ランク</th>
+              <th>セカスト</th>
+              <th>オフモール</th>
+              <th>まんだらけ</th>
+              <th>駿河屋</th>
               <th>状態</th>
               <th></th>
             </tr>
@@ -141,14 +169,23 @@ export function KeywordsPage({ userId }: { userId: number }) {
                 <td>{priceRangeLabel(item)}</td>
                 <td>{item.include_terms || "-"}</td>
                 <td>{item.exclude_terms || "-"}</td>
-                <td>{item.allowed_condition_ranks || "-"}</td>
+                <td>{item.secondstreet_condition_ranks || "-"}</td>
+                <td>{item.offmall_condition_ranks || "-"}</td>
+                <td>{item.mandarake_condition_ranks || "-"}</td>
+                <td>{item.surugaya_condition_tags || "-"}</td>
                 <td>{item.enabled ? "有効" : "無効"}</td>
-                <td><button className="dangerButton" onClick={() => removeKeyword(item.id)}>削除</button></td>
+                <td>
+                  <button className="dangerButton" onClick={() => removeKeyword(item.id)}>
+                    削除
+                  </button>
+                </td>
               </tr>
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={8} className="emptyCell">登録済みキーワードはありません</td>
+                <td colSpan={11} className="emptyCell">
+                  登録済みキーワードはありません
+                </td>
               </tr>
             )}
           </tbody>

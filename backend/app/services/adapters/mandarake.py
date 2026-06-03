@@ -6,6 +6,7 @@ from app.services.adapters.base import (
     absolutize,
     extract_first,
     fetch_html,
+    parse_mandarake_condition,
     parse_price,
     strip_tags,
 )
@@ -55,6 +56,7 @@ def parse_mandarake_products(html: str, limit: int = 20) -> list[ScrapedProduct]
                 product_url=absolutize(BASE_URL, href),
                 image_url=absolutize(BASE_URL, image_url) if image_url else None,
                 category=None,
+                condition_rank=parse_mandarake_condition(body),
             )
         )
         if len(products) >= limit:

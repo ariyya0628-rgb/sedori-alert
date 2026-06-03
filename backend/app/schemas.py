@@ -30,6 +30,10 @@ class KeywordCreate(BaseModel):
     include_terms: str = ""
     exclude_terms: str = ""
     allowed_condition_ranks: str = ""
+    secondstreet_condition_ranks: str = ""
+    offmall_condition_ranks: str = ""
+    mandarake_condition_ranks: str = ""
+    surugaya_condition_tags: str = ""
 
 
 class KeywordUpdate(BaseModel):
@@ -40,6 +44,10 @@ class KeywordUpdate(BaseModel):
     include_terms: str | None = None
     exclude_terms: str | None = None
     allowed_condition_ranks: str | None = None
+    secondstreet_condition_ranks: str | None = None
+    offmall_condition_ranks: str | None = None
+    mandarake_condition_ranks: str | None = None
+    surugaya_condition_tags: str | None = None
     enabled: bool | None = None
 
 
@@ -52,6 +60,10 @@ class KeywordResponse(BaseModel):
     include_terms: str
     exclude_terms: str
     allowed_condition_ranks: str
+    secondstreet_condition_ranks: str
+    offmall_condition_ranks: str
+    mandarake_condition_ranks: str
+    surugaya_condition_tags: str
     enabled: bool
     created_at: datetime
 

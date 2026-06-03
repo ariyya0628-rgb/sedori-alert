@@ -27,7 +27,7 @@ def format_price(value: int) -> str:
     return f"{value:,}円"
 
 
-def normalize_rank(value: str | None) -> str | None:
+def normalize_condition(value: str | None) -> str | None:
     if not value:
         return None
     return unicodedata.normalize("NFKC", value).strip().upper()
@@ -57,6 +57,36 @@ def find_exclude_term(product: Product, keyword: Keyword) -> str | None:
         if normalize_text(term) in haystack:
             return term
     return None
+
+
+def condition_filter_for_shop(keyword: Keyword, shop_code: str) -> tuple[str, str]:
+    if shop_code == "secondstreet":
+        return "セカスト", keyword.secondstreet_condition_ranks or keyword.allowed_condition_ranks
+    if shop_code == "offmall":
+        return "オフモール", keyword.offmall_condition_ranks
+    if shop_code == "mandarake":
+        return "まんだらけ", keyword.mandarake_condition_ranks
+    if shop_code == "surugaya":
+        return "駿河屋", keyword.surugaya_condition_tags
+    return "", ""
+
+
+def condition_is_allowed(product: Product, keyword: Keyword) -> str | None:
+    shop_label, allowed_value = condition_filter_for_shop(keyword, product.shop_code)
+    allowed = {normalize_condition(term) for term in split_terms(allowed_value)}
+    allowed.discard(None)
+    if not allowed:
+        return None
+
+    product_conditions = {normalize_condition(term) for term in split_terms(product.condition_rank)}
+    product_conditions.discard(None)
+    if not product_conditions:
+        return f"{shop_label}状態不明"
+
+    if product_conditions & allowed:
+        return None
+
+    return f"{shop_label}状態対象外: {product.condition_rank}"
 
 
 def evaluate_product_match(product: Product, keyword: Keyword) -> MatchDecision:
@@ -92,24 +122,14 @@ def evaluate_product_match(product: Product, keyword: Keyword) -> MatchDecision:
             skip_reason=f"価格が上限超過: {format_price(product.price)} > {format_price(keyword.max_price)}",
         )
 
-    allowed_ranks = {normalize_rank(rank) for rank in split_terms(keyword.allowed_condition_ranks)}
-    allowed_ranks.discard(None)
-    if allowed_ranks:
-        product_rank = normalize_rank(product.condition_rank)
-        if not product_rank:
-            return MatchDecision(
-                base_matched=True,
-                should_notify=False,
-                match_reason=match_reason,
-                skip_reason="状態ランク不明",
-            )
-        if product_rank not in allowed_ranks:
-            return MatchDecision(
-                base_matched=True,
-                should_notify=False,
-                match_reason=match_reason,
-                skip_reason=f"状態ランク対象外: {product.condition_rank}",
-            )
+    condition_skip_reason = condition_is_allowed(product, keyword)
+    if condition_skip_reason:
+        return MatchDecision(
+            base_matched=True,
+            should_notify=False,
+            match_reason=match_reason,
+            skip_reason=condition_skip_reason,
+        )
 
     return MatchDecision(base_matched=True, should_notify=True, match_reason=match_reason)
 

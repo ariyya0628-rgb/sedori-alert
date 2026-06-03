@@ -7,6 +7,7 @@ from app.services.adapters.base import (
     extract_first,
     fetch_html,
     parse_price,
+    parse_surugaya_condition,
     strip_tags,
 )
 
@@ -56,6 +57,7 @@ def parse_surugaya_products(html: str, limit: int = 20) -> list[ScrapedProduct]:
                 product_url=absolutize(BASE_URL, href),
                 image_url=absolutize(BASE_URL, image_url) if image_url else None,
                 category=None,
+                condition_rank=parse_surugaya_condition(f"{title} {block}"),
             )
         )
         if len(products) >= limit:
