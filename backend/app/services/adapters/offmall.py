@@ -6,6 +6,7 @@ from app.services.adapters.base import (
     absolutize,
     extract_first,
     fetch_html,
+    parse_condition_rank,
     parse_price,
     strip_tags,
 )
@@ -40,6 +41,10 @@ def parse_offmall_products(html: str, limit: int = 20) -> list[ScrapedProduct]:
         name = strip_tags(extract_first(r'<div class="item-name">(.*?)</div>', block) or "")
         code = strip_tags(extract_first(r'<div class="item-code">(.*?)</div>', block) or "")
         price_text = strip_tags(extract_first(r'<div class="item-price">(.*?)</div>', block) or "")
+        condition_text = strip_tags(
+            extract_first(r'<(?:div|span)[^>]+class="[^"]*(?:condition|rank|state)[^"]*"[^>]*>(.*?)</(?:div|span)>', block)
+            or block
+        )
         image_url = extract_first(r'<img[^>]+src="([^"]+)"', block)
         title = " ".join(part for part in [brand, name, code] if part).strip()
         if not title:
@@ -54,6 +59,7 @@ def parse_offmall_products(html: str, limit: int = 20) -> list[ScrapedProduct]:
                 product_url=absolutize(BASE_URL, href),
                 image_url=image_url,
                 category=None,
+                condition_rank=parse_condition_rank(condition_text),
             )
         )
         if len(products) >= limit:

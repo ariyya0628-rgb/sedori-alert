@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 import gzip
 import re
+import unicodedata
 import zlib
 
 
@@ -16,6 +17,7 @@ class ScrapedProduct:
     product_url: str
     image_url: str | None = None
     category: str | None = None
+    condition_rank: str | None = None
     stock_status: str = "instock"
 
 
@@ -64,6 +66,24 @@ def parse_price(value: str | None) -> int:
         return 0
     digits = re.sub(r"[^\d]", "", value)
     return int(digits) if digits else 0
+
+
+def parse_condition_rank(value: str | None) -> str | None:
+    if not value:
+        return None
+    text = unicodedata.normalize("NFKC", strip_tags(value)).upper()
+    if "未使用" in text or "新品" in text:
+        return "未使用"
+    if "ジャンク" in text:
+        return "ジャンク"
+    for pattern in [
+        r"(?:状態|コンディション|ランク|RANK|中古)\s*[:：]?\s*([SABCD][+-]?)",
+        r"\b([SABCD][+-]?)\b",
+    ]:
+        match = re.search(pattern, text)
+        if match:
+            return match.group(1)
+    return None
 
 
 def absolutize(base_url: str, href: str) -> str:

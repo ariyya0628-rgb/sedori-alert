@@ -5,11 +5,13 @@ from app import models  # noqa: F401
 from app.config import settings
 from app.database import Base, SessionLocal, engine
 from app.frontend import mount_frontend
+from app.migrations import run_lightweight_migrations
 from app.routers import auth, crawl_logs, crawler, keywords, notification_settings, notifications, products, scheduler
 from app.seed import seed_admin_user
 
 
 Base.metadata.create_all(bind=engine)
+run_lightweight_migrations(engine)
 
 with SessionLocal() as db:
     seed_admin_user(db)

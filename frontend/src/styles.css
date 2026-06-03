@@ -11,7 +11,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -122,6 +123,12 @@ a {
   flex-wrap: wrap;
 }
 
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .checkRow {
   display: flex !important;
   grid-template-columns: auto 1fr;
@@ -145,6 +152,11 @@ a {
 
 .tinyInput {
   max-width: 96px;
+}
+
+.multiInput {
+  min-height: 86px;
+  resize: vertical;
 }
 
 .primaryButton,
@@ -249,6 +261,10 @@ a {
   }
 
   .metricGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .formGrid {
     grid-template-columns: 1fr;
   }
 

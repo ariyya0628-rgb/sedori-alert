@@ -32,6 +32,11 @@ export type Keyword = {
   id: number;
   keyword: string;
   shop_code: string;
+  min_price: number | null;
+  max_price: number | null;
+  include_terms: string;
+  exclude_terms: string;
+  allowed_condition_ranks: string;
   enabled: boolean;
   created_at: string;
 };
@@ -44,6 +49,8 @@ export type NotificationItem = {
   matched_keyword: string;
   discord_status: string;
   discord_error: string | null;
+  match_reason: string | null;
+  skip_reason: string | null;
   notified_at: string;
 };
 
@@ -56,6 +63,7 @@ export type Product = {
   product_url: string;
   image_url: string | null;
   category: string | null;
+  condition_rank: string | null;
   stock_status: string;
   detected_at: string;
 };
@@ -122,11 +130,21 @@ export async function listKeywords(userId: number): Promise<Keyword[]> {
   return response.json();
 }
 
-export async function createKeyword(userId: number, keyword: string, shopCode: string) {
+export type KeywordCreatePayload = {
+  keyword: string;
+  shop_code: string;
+  min_price?: number | null;
+  max_price?: number | null;
+  include_terms?: string;
+  exclude_terms?: string;
+  allowed_condition_ranks?: string;
+};
+
+export async function createKeyword(userId: number, payload: KeywordCreatePayload) {
   const response = await apiFetch(`/api/keywords`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id: userId, keyword, shop_code: shopCode }),
+    body: JSON.stringify({ user_id: userId, ...payload }),
   });
   if (!response.ok) throw new Error("キーワード登録に失敗しました");
   return response.json();

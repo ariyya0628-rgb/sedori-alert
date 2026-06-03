@@ -11,7 +11,7 @@ from app.services.adapters.surugaya import fetch_surugaya_products
 from app.models import NotificationSetting
 from app.services.discord import send_discord_product_notification
 from app.services.secrets import decrypt_secret
-from app.services.matching import product_matches_keyword
+from app.services.matching import evaluate_product_match
 from app.services.mock_crawler import notification_exists
 from app.time_utils import utc_now
 
@@ -33,6 +33,7 @@ def upsert_scraped_product(db: Session, item: ScrapedProduct) -> Product:
         product.product_url = item.product_url
         product.image_url = item.image_url
         product.category = item.category
+        product.condition_rank = item.condition_rank
         product.stock_status = item.stock_status
         return product
 
@@ -45,6 +46,7 @@ def upsert_scraped_product(db: Session, item: ScrapedProduct) -> Product:
         product_url=item.product_url,
         image_url=item.image_url,
         category=item.category,
+        condition_rank=item.condition_rank,
         stock_status=item.stock_status,
     )
     db.add(product)
@@ -64,9 +66,25 @@ def process_scraped_products(db: Session, user_id: int, scraped_products: list[S
     for scraped in scraped_products:
         product = upsert_scraped_product(db, scraped)
         for keyword in keywords:
-            if not product_matches_keyword(product, keyword):
+            decision = evaluate_product_match(product, keyword)
+            if not decision.base_matched:
                 continue
             matched_count += 1
+            if not decision.should_notify:
+                db.add(
+                    Notification(
+                        user_id=user_id,
+                        shop_code=product.shop_code,
+                        product_title=product.title,
+                        product_url=product.product_url,
+                        matched_keyword=keyword.keyword,
+                        discord_status="skipped",
+                        discord_error=None,
+                        match_reason=decision.match_reason,
+                        skip_reason=decision.skip_reason,
+                    )
+                )
+                continue
             if notification_exists(db, user_id, product, keyword):
                 duplicates_skipped += 1
                 continue
@@ -90,6 +108,8 @@ def process_scraped_products(db: Session, user_id: int, scraped_products: list[S
                     matched_keyword=keyword.keyword,
                     discord_status=discord_status,
                     discord_error=discord_error,
+                    match_reason=decision.match_reason,
+                    skip_reason=None,
                 )
             )
             notifications_created += 1

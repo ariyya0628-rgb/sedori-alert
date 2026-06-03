@@ -24,6 +24,7 @@ export function NotificationsPage({ userId }: { userId: number }) {
               <th>商品</th>
               <th>キーワード</th>
               <th>状態</th>
+              <th>理由</th>
             </tr>
           </thead>
           <tbody>
@@ -34,11 +35,16 @@ export function NotificationsPage({ userId }: { userId: number }) {
                 <td><a href={item.product_url} target="_blank" rel="noreferrer">{item.product_title}</a></td>
                 <td>{item.matched_keyword}</td>
                 <td>{item.discord_status}</td>
+                <td>
+                  <div>{item.match_reason || "-"}</div>
+                  {item.skip_reason && <div className="errorText">{item.skip_reason}</div>}
+                  {item.discord_error && <div className="errorText">{item.discord_error}</div>}
+                </td>
               </tr>
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={5} className="emptyCell">通知履歴はまだありません</td>
+                <td colSpan={6} className="emptyCell">通知履歴はまだありません</td>
               </tr>
             )}
           </tbody>

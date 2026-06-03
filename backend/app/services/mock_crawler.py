@@ -65,6 +65,7 @@ def notification_exists(db: Session, user_id: int, product: Product, keyword: Ke
             Notification.user_id == user_id,
             Notification.product_url == product.product_url,
             Notification.matched_keyword == keyword.keyword,
+            Notification.discord_status != "skipped",
         )
         .first()
         is not None

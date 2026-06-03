@@ -24,6 +24,11 @@ class Keyword(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     keyword: Mapped[str] = mapped_column(String(255), index=True)
     shop_code: Mapped[str] = mapped_column(String(50), default="all")
+    min_price: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    max_price: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    include_terms: Mapped[str] = mapped_column(Text, default="")
+    exclude_terms: Mapped[str] = mapped_column(Text, default="")
+    allowed_condition_ranks: Mapped[str] = mapped_column(Text, default="")
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
@@ -53,6 +58,8 @@ class Notification(Base):
     matched_keyword: Mapped[str] = mapped_column(String(255))
     discord_status: Mapped[str] = mapped_column(String(50))
     discord_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    match_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    skip_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     notified_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     user: Mapped[User] = relationship()
@@ -70,6 +77,7 @@ class Product(Base):
     product_url: Mapped[str] = mapped_column(Text)
     image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     category: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    condition_rank: Mapped[str | None] = mapped_column(String(50), nullable=True)
     stock_status: Mapped[str] = mapped_column(String(50), default="instock")
     detected_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)

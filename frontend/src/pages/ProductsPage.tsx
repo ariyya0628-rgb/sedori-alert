@@ -32,6 +32,7 @@ export function ProductsPage() {
               <th>商品名</th>
               <th>価格</th>
               <th>カテゴリ</th>
+              <th>状態ランク</th>
               <th>在庫</th>
             </tr>
           </thead>
@@ -43,12 +44,13 @@ export function ProductsPage() {
                 <td><a href={product.product_url} target="_blank" rel="noreferrer">{product.title}</a></td>
                 <td>{product.price.toLocaleString("ja-JP")}円</td>
                 <td>{product.category || "-"}</td>
+                <td>{product.condition_rank || "-"}</td>
                 <td>{product.stock_status}</td>
               </tr>
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={6} className="emptyCell">商品はまだありません</td>
+                <td colSpan={7} className="emptyCell">商品はまだありません</td>
               </tr>
             )}
           </tbody>

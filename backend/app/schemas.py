@@ -25,11 +25,21 @@ class CurrentUserResponse(BaseModel):
 class KeywordCreate(BaseModel):
     keyword: str
     shop_code: str = "all"
+    min_price: int | None = None
+    max_price: int | None = None
+    include_terms: str = ""
+    exclude_terms: str = ""
+    allowed_condition_ranks: str = ""
 
 
 class KeywordUpdate(BaseModel):
     keyword: str | None = None
     shop_code: str | None = None
+    min_price: int | None = None
+    max_price: int | None = None
+    include_terms: str | None = None
+    exclude_terms: str | None = None
+    allowed_condition_ranks: str | None = None
     enabled: bool | None = None
 
 
@@ -37,6 +47,11 @@ class KeywordResponse(BaseModel):
     id: int
     keyword: str
     shop_code: str
+    min_price: int | None
+    max_price: int | None
+    include_terms: str
+    exclude_terms: str
+    allowed_condition_ranks: str
     enabled: bool
     created_at: datetime
 
@@ -62,6 +77,8 @@ class NotificationResponse(BaseModel):
     matched_keyword: str
     discord_status: str
     discord_error: str | None
+    match_reason: str | None
+    skip_reason: str | None
     notified_at: datetime
 
     model_config = {"from_attributes": True}
@@ -76,6 +93,7 @@ class ProductResponse(BaseModel):
     product_url: str
     image_url: str | None
     category: str | None
+    condition_rank: str | None
     stock_status: str
     detected_at: datetime
 
