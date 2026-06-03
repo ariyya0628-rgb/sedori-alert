@@ -15,13 +15,13 @@ def unique_user_id() -> int:
 
 def test_shop_crawler_sends_discord_when_webhook_is_enabled(monkeypatch):
     user_id = unique_user_id()
-    sent_messages: list[tuple[str, str]] = []
+    sent_messages: list[tuple[str, str, str]] = []
 
-    async def fake_send(webhook_url: str, content: str):
-        sent_messages.append((webhook_url, content))
+    async def fake_send(webhook_url: str, product, keyword_text: str):
+        sent_messages.append((webhook_url, product.title, keyword_text))
         return True, None
 
-    monkeypatch.setattr("app.services.shop_crawler.send_discord_webhook", fake_send)
+    monkeypatch.setattr("app.services.shop_crawler.send_discord_product_notification", fake_send)
     monkeypatch.setitem(
         __import__("app.services.shop_crawler", fromlist=["SHOP_FETCHERS"]).SHOP_FETCHERS,
         "offmall",
@@ -49,7 +49,9 @@ def test_shop_crawler_sends_discord_when_webhook_is_enabled(monkeypatch):
     response = client.post(f"/api/crawler/run-shop?user_id={user_id}&shop_code=offmall&keyword=レコルト&limit=2")
 
     assert response.status_code == 200
-    assert sent_messages
+    assert sent_messages == [
+        ("https://discord.com/api/webhooks/123456/token", "レコルト ホットプレート", "レコルト")
+    ]
     notifications = client.get(f"/api/notifications?user_id={user_id}").json()
     assert any(item["discord_status"] == "success" for item in notifications)
 

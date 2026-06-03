@@ -9,7 +9,7 @@ from app.services.adapters.offmall import fetch_offmall_products
 from app.services.adapters.secondstreet import fetch_secondstreet_products
 from app.services.adapters.surugaya import fetch_surugaya_products
 from app.models import NotificationSetting
-from app.services.discord import send_discord_webhook
+from app.services.discord import send_discord_product_notification
 from app.services.secrets import decrypt_secret
 from app.services.matching import product_matches_keyword
 from app.services.mock_crawler import notification_exists
@@ -76,15 +76,8 @@ def process_scraped_products(db: Session, user_id: int, scraped_products: list[S
             if notification_setting and notification_setting.discord_enabled and webhook_url:
                 import asyncio
 
-                content = (
-                    f"[{product.shop_code}] 新着商品を検知しました\n"
-                    f"キーワード: {keyword.keyword}\n"
-                    f"商品名: {product.title}\n"
-                    f"価格: {product.price:,}円\n"
-                    f"URL: {product.product_url}"
-                )
                 ok, discord_error = asyncio.run(
-                    send_discord_webhook(webhook_url, content)
+                    send_discord_product_notification(webhook_url, product, keyword.keyword)
                 )
                 discord_status = "success" if ok else "failed"
 
