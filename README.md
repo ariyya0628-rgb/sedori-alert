@@ -156,6 +156,22 @@ POST /api/scheduler/run-due?user_id=1
 
 Discord Webhookが設定済みかつ通知が有効な場合、キーワードに一致した新着商品を検知するとDiscordへ通知します。
 
+画面を開かずに1回だけ実行:
+
+```powershell
+cd sedori-alert
+.\scripts\run-scheduler-once.ps1 -UserId 1
+```
+
+PC起動中に簡易監視:
+
+```powershell
+cd sedori-alert
+.\scripts\start-monitor.ps1 -UserId 1 -EverySeconds 60
+```
+
+本番運用では、WindowsタスクスケジューラやVPSのcronから `run-scheduler-once.ps1` を定期実行する方式がおすすめです。
+
 ## 秘密情報
 
 Discord Webhook URLは暗号化してDBに保存します。
