@@ -43,6 +43,14 @@ cd sedori-alert
 .\scripts\start-site.ps1
 ```
 
+ダブルクリック起動:
+
+```text
+open-sedori-alert.cmd
+```
+
+このファイルを開くと、サーバー用PowerShellが起動し、準備ができたらブラウザで `http://127.0.0.1:8000/` を開きます。サーバー用PowerShellを閉じるとサイトも止まります。
+
 画面:
 
 ```text
