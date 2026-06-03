@@ -7,6 +7,7 @@ import { DiscordSettingsPage } from "./pages/DiscordSettingsPage";
 import { NotificationsPage } from "./pages/NotificationsPage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { SchedulerPage } from "./pages/SchedulerPage";
+import { clearAccessToken } from "./api";
 
 type Page = "dashboard" | "keywords" | "products" | "scheduler" | "discord" | "notifications";
 
@@ -17,6 +18,7 @@ export default function App() {
 
   function logout() {
     localStorage.removeItem("sedori_user_id");
+    clearAccessToken();
     setUserId(null);
   }
 

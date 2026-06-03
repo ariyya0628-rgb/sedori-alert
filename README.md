@@ -80,6 +80,8 @@ admin@example.com
 password123
 ```
 
+ログイン後はブラウザにアクセストークンを保存し、API呼び出し時に `Authorization: Bearer ...` を送信します。
+
 ## フロントエンド起動
 
 簡単起動:

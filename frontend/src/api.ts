@@ -1,4 +1,32 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+const TOKEN_STORAGE_KEY = "sedori_access_token";
+
+export function getAccessToken() {
+  return localStorage.getItem(TOKEN_STORAGE_KEY);
+}
+
+export function setAccessToken(token: string) {
+  localStorage.setItem(TOKEN_STORAGE_KEY, token);
+}
+
+export function clearAccessToken() {
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+}
+
+function authHeaders(extra?: HeadersInit): HeadersInit {
+  const token = getAccessToken();
+  return {
+    ...(extra || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+function apiFetch(path: string, init: RequestInit = {}) {
+  return fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers: authHeaders(init.headers),
+  });
+}
 
 export type Keyword = {
   id: number;
@@ -89,13 +117,13 @@ export async function login(email: string, password: string) {
 }
 
 export async function listKeywords(userId: number): Promise<Keyword[]> {
-  const response = await fetch(`${API_BASE}/api/keywords?user_id=${userId}`);
+  const response = await apiFetch(`/api/keywords?user_id=${userId}`);
   if (!response.ok) throw new Error("キーワード取得に失敗しました");
   return response.json();
 }
 
 export async function createKeyword(userId: number, keyword: string, shopCode: string) {
-  const response = await fetch(`${API_BASE}/api/keywords`, {
+  const response = await apiFetch(`/api/keywords`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId, keyword, shop_code: shopCode }),
@@ -105,12 +133,12 @@ export async function createKeyword(userId: number, keyword: string, shopCode: s
 }
 
 export async function deleteKeyword(keywordId: number) {
-  const response = await fetch(`${API_BASE}/api/keywords/${keywordId}`, { method: "DELETE" });
+  const response = await apiFetch(`/api/keywords/${keywordId}`, { method: "DELETE" });
   if (!response.ok) throw new Error("キーワード削除に失敗しました");
 }
 
 export async function updateDiscordSettings(userId: number, webhookUrl: string, enabled: boolean) {
-  const response = await fetch(`${API_BASE}/api/notification-settings?user_id=${userId}`, {
+  const response = await apiFetch(`/api/notification-settings?user_id=${userId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ discord_webhook_url: webhookUrl || null, discord_enabled: enabled }),
@@ -120,7 +148,7 @@ export async function updateDiscordSettings(userId: number, webhookUrl: string, 
 }
 
 export async function testDiscord(userId: number) {
-  const response = await fetch(`${API_BASE}/api/notifications/test-discord?user_id=${userId}`, {
+  const response = await apiFetch(`/api/notifications/test-discord?user_id=${userId}`, {
     method: "POST",
   });
   if (!response.ok) throw new Error("テスト通知に失敗しました");
@@ -128,13 +156,13 @@ export async function testDiscord(userId: number) {
 }
 
 export async function listNotifications(userId: number): Promise<NotificationItem[]> {
-  const response = await fetch(`${API_BASE}/api/notifications?user_id=${userId}`);
+  const response = await apiFetch(`/api/notifications?user_id=${userId}`);
   if (!response.ok) throw new Error("通知履歴の取得に失敗しました");
   return response.json();
 }
 
 export async function runMockCrawler(userId: number): Promise<MockCrawlerResult> {
-  const response = await fetch(`${API_BASE}/api/crawler/run-mock?user_id=${userId}`, {
+  const response = await apiFetch(`/api/crawler/run-mock?user_id=${userId}`, {
     method: "POST",
   });
   if (!response.ok) throw new Error("モック巡回に失敗しました");
@@ -153,7 +181,7 @@ export async function runShopCrawler(
     keyword,
     limit: String(limit),
   });
-  const response = await fetch(`${API_BASE}/api/crawler/run-shop?${params.toString()}`, {
+  const response = await apiFetch(`/api/crawler/run-shop?${params.toString()}`, {
     method: "POST",
   });
   if (!response.ok) throw new Error("ショップ巡回に失敗しました");
@@ -165,7 +193,7 @@ export async function runRegisteredKeywords(userId: number, limit: number): Prom
     user_id: String(userId),
     limit: String(limit),
   });
-  const response = await fetch(`${API_BASE}/api/crawler/run-keywords?${params.toString()}`, {
+  const response = await apiFetch(`/api/crawler/run-keywords?${params.toString()}`, {
     method: "POST",
   });
   if (!response.ok) throw new Error("登録キーワード巡回に失敗しました");
@@ -173,25 +201,25 @@ export async function runRegisteredKeywords(userId: number, limit: number): Prom
 }
 
 export async function listProducts(): Promise<Product[]> {
-  const response = await fetch(`${API_BASE}/api/products`);
+  const response = await apiFetch(`/api/products`);
   if (!response.ok) throw new Error("商品一覧の取得に失敗しました");
   return response.json();
 }
 
 export async function listCrawlLogs(): Promise<CrawlLog[]> {
-  const response = await fetch(`${API_BASE}/api/crawl-logs`);
+  const response = await apiFetch(`/api/crawl-logs`);
   if (!response.ok) throw new Error("巡回ログの取得に失敗しました");
   return response.json();
 }
 
 export async function getSchedulerSetting(userId: number): Promise<SchedulerSetting> {
-  const response = await fetch(`${API_BASE}/api/scheduler/settings?user_id=${userId}`);
+  const response = await apiFetch(`/api/scheduler/settings?user_id=${userId}`);
   if (!response.ok) throw new Error("スケジュール設定の取得に失敗しました");
   return response.json();
 }
 
 export async function saveSchedulerSetting(userId: number, setting: SchedulerSetting): Promise<SchedulerSetting> {
-  const response = await fetch(`${API_BASE}/api/scheduler/settings?user_id=${userId}`, {
+  const response = await apiFetch(`/api/scheduler/settings?user_id=${userId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(setting),
@@ -201,7 +229,7 @@ export async function saveSchedulerSetting(userId: number, setting: SchedulerSet
 }
 
 export async function runDueScheduler(userId: number): Promise<SchedulerRunDueResult> {
-  const response = await fetch(`${API_BASE}/api/scheduler/run-due?user_id=${userId}`, {
+  const response = await apiFetch(`/api/scheduler/run-due?user_id=${userId}`, {
     method: "POST",
   });
   if (!response.ok) throw new Error("期限到来分の実行に失敗しました");

@@ -16,6 +16,12 @@ class LoginResponse(BaseModel):
     display_name: str
 
 
+class CurrentUserResponse(BaseModel):
+    user_id: int
+    email: str
+    display_name: str
+
+
 class KeywordCreate(BaseModel):
     keyword: str
     shop_code: str = "all"

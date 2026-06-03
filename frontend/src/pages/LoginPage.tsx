@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { login } from "../api";
+import { login, setAccessToken } from "../api";
 
 export function LoginPage({ onLogin }: { onLogin: (userId: number) => void }) {
   const [email, setEmail] = useState("admin@example.com");
@@ -11,6 +11,7 @@ export function LoginPage({ onLogin }: { onLogin: (userId: number) => void }) {
     try {
       const result = await login(email, password);
       localStorage.setItem("sedori_user_id", String(result.user_id));
+      setAccessToken(result.access_token);
       onLogin(result.user_id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "ログインに失敗しました");
