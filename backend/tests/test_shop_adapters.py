@@ -1,8 +1,9 @@
 from fastapi.testclient import TestClient
+from urllib.error import HTTPError
 
 from app.main import app
 from app.services.adapters.offmall import parse_offmall_products
-from app.services.adapters.secondstreet import parse_secondstreet_products
+from app.services.adapters.secondstreet import fetch_secondstreet_products, parse_secondstreet_products
 from app.services.adapters.mandarake import parse_mandarake_products
 from app.services.adapters.surugaya import parse_surugaya_products
 from app.services.shop_crawler import SHOP_FETCHERS
@@ -84,6 +85,19 @@ def test_parse_secondstreet_products_from_search_html():
     assert "レコルト" in product.title
     assert product.price == 4290
     assert product.product_url == "https://www.2ndstreet.jp/goods/detail/goodsId/2321513159015/shopsId/31740"
+
+
+def test_secondstreet_falls_back_to_browser_fetch_on_403(monkeypatch):
+    def fake_fetch_html(url: str, timeout: int = 20, referer: str | None = None):
+        raise HTTPError(url, 403, "Forbidden", hdrs=None, fp=None)
+
+    monkeypatch.setattr("app.services.adapters.secondstreet.fetch_html", fake_fetch_html)
+    monkeypatch.setattr("app.services.adapters.secondstreet.fetch_secondstreet_html_with_browser", lambda url: SECONDSTREET_HTML)
+
+    products = fetch_secondstreet_products("レコルト")
+
+    assert len(products) == 1
+    assert products[0].external_product_id == "2321513159015"
 
 
 def test_parse_mandarake_products_from_search_html():
