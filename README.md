@@ -46,6 +46,12 @@ cd sedori-alert
 ダブルクリック起動:
 
 ```text
+00_START.bat
+```
+
+または:
+
+```text
 open-sedori-alert.cmd
 ```
 
