@@ -42,3 +42,27 @@ def test_webhook_url_is_encrypted_at_rest():
         assert row is not None
         assert row.discord_webhook_url != webhook_url
         assert not row.discord_webhook_url.startswith("https://discord.com")
+
+
+def test_discord_test_notification_uses_decrypted_webhook(monkeypatch):
+    user_id = 90909092
+    webhook_url = "https://discord.com/api/webhooks/decrypted/token"
+    sent_urls: list[str] = []
+
+    async def fake_send_discord_webhook(url: str, content: str | None = None, payload: dict | None = None):
+        sent_urls.append(url)
+        return True, None
+
+    monkeypatch.setattr("app.routers.notifications.send_discord_webhook", fake_send_discord_webhook)
+    client.patch(
+        f"/api/notification-settings?user_id={user_id}",
+        json={
+            "discord_webhook_url": webhook_url,
+            "discord_enabled": True,
+        },
+    )
+
+    response = client.post(f"/api/notifications/test-discord?user_id={user_id}")
+
+    assert response.status_code == 200
+    assert sent_urls == [webhook_url]

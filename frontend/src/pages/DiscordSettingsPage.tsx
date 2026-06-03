@@ -12,9 +12,9 @@ export function DiscordSettingsPage({ userId }: { userId: number }) {
     setError("");
     try {
       await updateDiscordSettings(userId, webhookUrl, enabled);
-      setMessage("Discord設定を保存しました");
+      setMessage("Discord setting saved.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "保存に失敗しました");
+      setError(err instanceof Error ? err.message : "Save failed.");
     }
   }
 
@@ -22,17 +22,18 @@ export function DiscordSettingsPage({ userId }: { userId: number }) {
     setMessage("");
     setError("");
     try {
+      await updateDiscordSettings(userId, webhookUrl, enabled);
       await testDiscord(userId);
-      setMessage("テスト通知を送信しました");
+      setMessage("Test notification sent.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "テスト通知に失敗しました");
+      setError(err instanceof Error ? err.message : "Test notification failed.");
     }
   }
 
   return (
     <section className="panel">
       <div className="pageHeader">
-        <h2>Discord通知設定</h2>
+        <h2>Discord Settings</h2>
       </div>
       <div className="card">
         <label>
@@ -41,11 +42,11 @@ export function DiscordSettingsPage({ userId }: { userId: number }) {
         </label>
         <label className="checkRow">
           <input type="checkbox" checked={enabled} onChange={(event) => setEnabled(event.target.checked)} />
-          通知を有効にする
+          Enable notifications
         </label>
         <div className="formRow">
-          <button className="primaryButton" onClick={save}>保存</button>
-          <button className="secondaryButton" onClick={sendTest}>テスト通知</button>
+          <button className="primaryButton" onClick={save}>Save</button>
+          <button className="secondaryButton" onClick={sendTest}>Save and send test</button>
         </div>
         {message && <p className="successText">{message}</p>}
         {error && <p className="errorText">{error}</p>}

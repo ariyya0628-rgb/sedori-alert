@@ -5,6 +5,7 @@ from app.database import get_db
 from app.models import Notification, NotificationSetting
 from app.schemas import NotificationResponse
 from app.services.discord import send_discord_webhook
+from app.services.secrets import decrypt_secret
 
 
 router = APIRouter(prefix="/api/notifications", tags=["notifications"])
@@ -26,9 +27,10 @@ async def test_discord(user_id: int = Query(...), db: Session = Depends(get_db))
     if not setting or not setting.discord_webhook_url or not setting.discord_enabled:
         raise HTTPException(status_code=400, detail="Discord notification is not configured")
 
+    webhook_url = decrypt_secret(setting.discord_webhook_url)
     ok, error = await send_discord_webhook(
-        setting.discord_webhook_url,
-        "せどり新着アラートのテスト通知です。",
+        webhook_url,
+        "Sedori Alert test notification.",
     )
     row = Notification(
         user_id=user_id,
